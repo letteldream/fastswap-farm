@@ -35,7 +35,7 @@ contract MasterChef is Ownable {
     using SafeERC20 for IERC20;
 
     uint256 constant UNIT = 1e18;
-    uint256 constant YEAR = 365;
+    uint256 constant YEAR = 183;
 
     uint256 private billion = 1e9 * UNIT;
     uint256 private totalFastAvailable = billion.mul(65).div(100);
@@ -50,8 +50,7 @@ contract MasterChef is Ownable {
     // Info of each pool.
     struct PoolInfo {
         IERC20 lpToken;           // Address of LP token contract.
-        uint256 percentFastTokens;  // Percentage of tokens to be distributed. TODO: remove
-//        uint256 amountFastTokens;  // Percentage of tokens to be distributed.
+        uint256 amountFastTokens;  // Percentage of tokens to be distributed.
         uint256 lastRewardTime;   // Last time number that FASTs distribution occurs.
         uint256 accFastPerShare;    // Accumulated FASTs per share, times 1e18. See below.
     }
@@ -62,8 +61,6 @@ contract MasterChef is Ownable {
     uint256 public endTime;
     // The time when FAST mining starts.
     uint256 public startTime;
-    // Percentage of tokens to be distributed per year
-    uint256 public percentFastTokensYear;
     // The migrator contract. It has a lot of power. Can only be set through governance (owner).
     IMigratorChef public migrator;
 
@@ -79,13 +76,11 @@ contract MasterChef is Ownable {
     constructor(
         IERC20 _fast,
         uint256 _endTime,
-        uint256 _startTime,
-        uint256 _percentFastTokensYear
+        uint256 _startTime
     ) public {
         fast = _fast;
         endTime = _endTime;
         startTime = _startTime;
-        percentFastTokensYear = _percentFastTokensYear;
     }
 
     /**
@@ -115,11 +110,7 @@ contract MasterChef is Ownable {
                 time = endTime.sub(pool.lastRewardTime);
             }
 
-            uint256 tokensPerYear = totalFastAvailable.mul(percentFastTokensYear).div(100); // TODO: remove
-            uint256 tokensForPool = tokensPerYear.mul(pool.percentFastTokens).div(100); // TODO: remove
-
-            uint256 fastReward = tokensForPool.mul(1e18).div(perYear).mul(time);
-            // TODO: replace with pool.amount
+            uint256 fastReward = pool.amountFastTokens.mul(1e18).div(perYear).mul(time);
             if (fastReward > 0) {
                 accFastPerShare = accFastPerShare.add(fastReward.div(lpSupply));
             }
@@ -128,27 +119,16 @@ contract MasterChef is Ownable {
         return user.amount.mul(accFastPerShare).div(1e18).sub(user.rewardDebt);
     }
 
-//    TODO: update pool function
-    /**
-     * @dev Set new percent Fast tokens in year.
-     * @param _percentFastTokensYear new percent for pools
-     */
-    function setPercentFastTokensYear(uint256 _percentFastTokensYear) public onlyOwner {
-        require(block.timestamp <= endTime, "contract stopped work");
-        require(_percentFastTokensYear > 0 && _percentFastTokensYear <= 100, "setPercentFastTokensYear: incorrect value");
-        percentFastTokensYear = _percentFastTokensYear;
-    }
-
     /**
      * @dev Add a new lp to the pool. Can only be called by the owner.
      * XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
-     * @param _percentFastTokens percent for pool
+     * @param _amountFastTokens amount of tokens for pool
      * @param _lpToken token interface
      * @param _withUpdate whether to update information
      */
-    function add(uint256 _percentFastTokens, IERC20 _lpToken, bool _withUpdate) public onlyOwner {
+    function add(uint256 _amountFastTokens, IERC20 _lpToken, bool _withUpdate) public onlyOwner {
         require(block.timestamp <= endTime, "contract stopped work");
-        require(_percentFastTokens > 0 && _percentFastTokens <= 100, "add: incorrect value");
+        require(_amountFastTokens > 0, "add: incorrect value");
 
         if (_withUpdate) {
             massUpdatePools();
@@ -157,7 +137,7 @@ contract MasterChef is Ownable {
         uint256 lastRewardTime = block.timestamp > startTime ? block.timestamp : startTime;
         poolInfo.push(PoolInfo({
         lpToken: _lpToken,
-        percentFastTokens: _percentFastTokens,
+        amountFastTokens: _amountFastTokens,
         lastRewardTime: lastRewardTime,
         accFastPerShare: 0
         }));
@@ -166,18 +146,18 @@ contract MasterChef is Ownable {
     /**
      * @dev Update the given pool's FAST percent. Can only be called by the owner.
      * @param _pid pool ID
-     * @param _percentFastTokens percent for pool
+     * @param _amountFastTokens amount of tokens
      * @param _withUpdate whether to update information
      */
-    function set(uint256 _pid, uint256 _percentFastTokens, bool _withUpdate) public onlyOwner {
+    function set(uint256 _pid, uint256 _amountFastTokens, bool _withUpdate) public onlyOwner {
         require(block.timestamp <= endTime, "contract stopped work");
-        require(_percentFastTokens > 0 && _percentFastTokens <= 100, "set: incorrect value");
+        require(_amountFastTokens > 0, "set: incorrect value");
 
         if (_withUpdate) {
             massUpdatePools();
         }
 
-        poolInfo[_pid].percentFastTokens = _percentFastTokens;
+        poolInfo[_pid].amountFastTokens = _amountFastTokens;
     }
 
     /**
@@ -236,10 +216,7 @@ contract MasterChef is Ownable {
 
         uint256 time = block.timestamp.sub(pool.lastRewardTime);
 
-        uint256 tokensPerYear = totalFastAvailable.mul(percentFastTokensYear).div(100);
-        uint256 tokensForPool = tokensPerYear.mul(pool.percentFastTokens).div(100);
-
-        uint256 fastReward = tokensForPool.div(perYear).mul(time); // TODO: fixed amount
+        uint256 fastReward = pool.amountFastTokens.div(perYear).mul(time);
         if (fastReward > 0 ) {
             pool.accFastPerShare = pool.accFastPerShare.add(fastReward.mul(1e18).div(lpSupply));
         }
