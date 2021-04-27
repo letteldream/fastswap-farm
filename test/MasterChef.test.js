@@ -73,37 +73,226 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
         it('should return correct values pendingFast for 1 user', async () => {
             const timestamp = await time.latest();
-            const endTimestamp = timestamp.add(time.duration.days(3));
+            const endTimestamp = timestamp.add(time.duration.days(366));
             this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
             // To last for 3 days
-            this.fast.transfer(this.chef.address, web3.utils.toWei('200000', 'ether'), {from: minter});
+            this.fast.transfer(this.chef.address, web3.utils.toWei('20000', 'ether'), {from: minter});
 
             await this.chef.add(20000, this.lp.address, false);
-            await this.lp.approve(this.chef.address, web3.utils.toWei('200001', 'ether'), {from: bob});
-            await this.chef.deposit(0, web3.utils.toWei('100', 'ether'), {from: bob});
+            await this.lp.approve(this.chef.address, web3.utils.toWei('20001', 'ether'), {from: bob});
+            await this.chef.deposit(0, web3.utils.toWei('1', 'ether'), {from: bob});
             assert.equal(await this.chef.pendingFast(0, bob), 0);
 
             await time.increase(time.duration.days(1));
             let pendingFast = await this.chef.pendingFast(0, bob);
-            console.log("110, pendingFast: ", pendingFast.toString())
+            console.log("1 day, pendingFast: ", pendingFast.toString())
             // assert(pendingFast > web3.utils.toWei('89041', 'ether'));
             // assert(pendingFast < web3.utils.toWei('89043', 'ether'));
 
             await time.increase(time.duration.days(1));
             pendingFast = await this.chef.pendingFast(0, bob);
+            console.log("2 day, pendingFast: ", pendingFast.toString())
             // assert(pendingFast > web3.utils.toWei('178082', 'ether'));
             // assert(pendingFast < web3.utils.toWei('178084', 'ether'));
 
             await time.increase(time.duration.days(1));
             pendingFast = await this.chef.pendingFast(0, bob);
+            console.log("3 day, pendingFast: ", pendingFast.toString())
             // assert(pendingFast > web3.utils.toWei('267121', 'ether'));
             // assert(pendingFast < web3.utils.toWei('267124', 'ether'));
 
-            await time.increase(time.duration.days(1));
+            await time.increase(time.duration.days(7));
             pendingFast = await this.chef.pendingFast(0, bob);
+            console.log("10 day, pendingFast: ", pendingFast.toString())
+            // assert(pendingFast > web3.utils.toWei('267121', 'ether'));
+            // assert(pendingFast < web3.utils.toWei('267124', 'ether'));
+
+            await time.increase(time.duration.days(173));
+            pendingFast = await this.chef.pendingFast(0, bob);
+            console.log("183 day, pendingFast: ", pendingFast.toString())
+            // assert(pendingFast > web3.utils.toWei('267121', 'ether'));
+            // assert(pendingFast < web3.utils.toWei('267124', 'ether'));
+
+            await time.increase(time.duration.days(183));
+            pendingFast = await this.chef.pendingFast(0, bob);
+            console.log("366 day, pendingFast: ", pendingFast.toString())
             // assert(pendingFast > web3.utils.toWei('267122', 'ether'));
             // assert(pendingFast < web3.utils.toWei('267124', 'ether'));
         });
 
+        it('should return correct values fast balanceOf for 1 user', async () => {
+            const timestamp = await time.latest();
+            const endTimestamp = timestamp.add(time.duration.days(400));
+            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            // To last for 3 days
+            this.fast.transfer(this.chef.address, web3.utils.toWei('20000', 'ether'), {from: minter});
+
+            await this.chef.add(20000, this.lp.address, false);
+            await this.lp.approve(this.chef.address, web3.utils.toWei('20001', 'ether'), {from: bob});
+            await this.chef.deposit(0, web3.utils.toWei('1', 'ether'), {from: bob});
+            assert.equal(await this.chef.pendingFast(0, bob), 0);
+
+            await time.increase(time.duration.days(183));
+            let pendingFast = await this.chef.pendingFast(0, bob);
+            console.log("1 day, pendingFast: ", pendingFast.toString())
+            // assert(pendingFast > web3.utils.toWei('89041', 'ether'));
+            // assert(pendingFast < web3.utils.toWei('89043', 'ether'));
+
+            await this.chef.deposit(0, web3.utils.toWei('1', 'ether'), {from: bob});
+            assert.equal(await this.chef.pendingFast(0, bob), 0);
+
+            await time.increase(time.duration.days(183));
+            pendingFast = await this.chef.pendingFast(0, bob);
+            console.log("1 day, pendingFast: ", pendingFast.toString())
+            // assert(pendingFast > web3.utils.toWei('89041', 'ether'));
+            // assert(pendingFast < web3.utils.toWei('89043', 'ether'));
+
+        });
+
+        it('should return correct values Fast balanceOf for 1 user. Change pool', async () => {
+            const timestamp = await time.latest();
+            const endTimestamp = timestamp.add(time.duration.days(90));
+            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp,  {from: alice});
+            this.fast.transfer(this.chef.address, web3.utils.toWei('300000', 'ether'), {from: minter});
+
+            await this.chef.add(20, this.lp.address, false);
+            await this.lp.approve(this.chef.address, web3.utils.toWei('1000', 'ether'), {from: bob});
+            await this.chef.deposit(0, web3.utils.toWei('100', 'ether'), {from: bob});
+
+            // Change percent pool
+            await expectRevert(this.chef.set(0, 0, false), 'set: incorrect value');
+            await this.chef.set(0, 25, false);
+
+            await time.increase(time.duration.days(1));
+            await this.chef.deposit(0, 0, {from: bob});
+            let balanceOf = await this.fast.balanceOf(bob);
+            // assert(balanceOf > web3.utils.toWei('111301', 'ether'));
+            // assert(balanceOf < web3.utils.toWei('111303', 'ether'));
+
+            // Change percent pool
+            await this.chef.set(0, 20, true);
+
+            await time.increase(time.duration.days(1));
+            await this.chef.withdraw(0, 0, {from: bob});
+            balanceOf = await this.fast.balanceOf(bob);
+            // assert(balanceOf > web3.utils.toWei('200342', 'ether'));
+            // assert(balanceOf < web3.utils.toWei('200346', 'ether'));
+        });
+
+        it('should return correct values Fast balanceOf for 2 user', async () => {
+            const timestamp = await time.latest();
+            const endTimestamp = timestamp.add(time.duration.days(90));
+            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp,  {from: alice});
+            // To last for 3 days
+            this.fast.transfer(this.chef.address, web3.utils.toWei('200000', 'ether'), {from: minter});
+            await this.chef.add(20, this.lp.address, true);
+
+            await this.lp.approve(this.chef.address, web3.utils.toWei('1000', 'ether'), {from: bob});
+            await this.chef.deposit(0, web3.utils.toWei('100', 'ether'), {from: bob});
+
+            await this.lp.approve(this.chef.address, web3.utils.toWei('1000', 'ether'), {from: carol});
+            await this.chef.deposit(0, web3.utils.toWei('100', 'ether'), {from: carol});
+
+            await time.increase(time.duration.days(1));
+            await this.chef.deposit(0, 0, {from: bob});
+            await this.chef.deposit(0, 0, {from: carol});
+            let balanceOf = await this.fast.balanceOf(bob);
+            // assert(balanceOf > web3.utils.toWei('44520', 'ether'));
+            // assert(balanceOf < web3.utils.toWei('44522', 'ether'));
+
+            balanceOf = await this.fast.balanceOf(carol);
+            // assert(balanceOf > web3.utils.toWei('44520', 'ether'));
+            // assert(balanceOf < web3.utils.toWei('44522', 'ether'));
+        });
+
+        it('should return correct values Fast balanceOf for 2 user on different days', async () => {
+            const timestamp = await time.latest();
+            const endTimestamp = timestamp.add(time.duration.days(90));
+            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            // To last for 3 days
+            this.fast.transfer(this.chef.address, web3.utils.toWei('200000', 'ether'), {from: minter});
+            await this.chef.add(20, this.lp.address, false);
+
+            await this.lp.approve(this.chef.address, web3.utils.toWei('1000', 'ether'), {from: bob});
+            await this.chef.deposit(0, web3.utils.toWei('100', 'ether'), {from: bob});
+
+            await time.increase(time.duration.days(1));
+            await this.chef.deposit(0, 0, {from: bob});
+            let balanceOf = await this.fast.balanceOf(bob);
+            // assert(balanceOf > web3.utils.toWei('89041', 'ether'));
+            // assert(balanceOf < web3.utils.toWei('89043', 'ether'));
+
+            await this.lp.approve(this.chef.address, web3.utils.toWei('1000', 'ether'), {from: carol});
+            await this.chef.deposit(0, web3.utils.toWei('100', 'ether'), {from: carol});
+
+            await time.increase(time.duration.days(1));
+            await this.chef.deposit(0, 0, {from: bob});
+            await this.chef.deposit(0, 0, {from: carol});
+            balanceOf = await this.fast.balanceOf(bob);
+            // assert(balanceOf > web3.utils.toWei('133561', 'ether'));
+            // assert(balanceOf < web3.utils.toWei('133563', 'ether'));
+
+            balanceOf = await this.fast.balanceOf(carol);
+            // assert(balanceOf > web3.utils.toWei('44520', 'ether'));
+            // assert(balanceOf < web3.utils.toWei('44522', 'ether'));
+        });
+
+        it('should return correct values Fast balanceOf for 2 user on different days. Recount at the end', async () => {
+            const timestamp = await time.latest();
+            const endTimestamp = timestamp.add(time.duration.days(90));
+            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            // To last for 3 days
+            this.fast.transfer(this.chef.address, web3.utils.toWei('200000', 'ether'), {from: minter});
+            await this.chef.add(20, this.lp.address, true);
+
+            await this.lp.approve(this.chef.address, web3.utils.toWei('1000', 'ether'), {from: bob});
+            await this.chef.deposit(0, web3.utils.toWei('100', 'ether'), {from: bob});
+
+            await time.increase(time.duration.days(1));
+            const pendingFast = await this.chef.pendingFast(0, bob);
+            // assert(pendingFast > web3.utils.toWei('89041', 'ether'));
+            // assert(pendingFast < web3.utils.toWei('89043', 'ether'));
+
+            await this.lp.approve(this.chef.address, web3.utils.toWei('1000', 'ether'), {from: carol});
+            await this.chef.deposit(0, web3.utils.toWei('100', 'ether'), {from: carol});
+
+            await time.increase(time.duration.days(1));
+            await this.chef.deposit(0, 0, {from: bob});
+            await this.chef.deposit(0, 0, {from: carol});
+            let balanceOf = await this.fast.balanceOf(bob);
+            // assert(balanceOf > web3.utils.toWei('133561', 'ether'));
+            // assert(balanceOf < web3.utils.toWei('133563', 'ether'));
+
+            balanceOf = await this.fast.balanceOf(carol);
+            // assert(balanceOf > web3.utils.toWei('44520', 'ether'));
+            // assert(balanceOf < web3.utils.toWei('44522', 'ether'));
+        });
+
+        it('should return correct values Fast and LP balanceOf for 1 user', async () => {
+            const timestamp = await time.latest();
+            const endTimestamp = timestamp.add(time.duration.days(90));
+            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            // To last for 3 days
+            this.fast.transfer(this.chef.address, web3.utils.toWei('200000', 'ether'), {from: minter});
+
+            await this.chef.add(20, this.lp.address, false);
+            await this.lp.approve(this.chef.address, web3.utils.toWei('1000', 'ether'), {from: bob});
+
+            await this.chef.withdraw(0, 0, {from: bob});
+            // assert.equal(await this.fast.balanceOf(bob), 0);
+
+            await this.chef.deposit(0, web3.utils.toWei('100', 'ether'), {from: bob});
+
+            await time.increase(time.duration.days(1));
+            // Trying to shoot more than necessary
+            await expectRevert(this.chef.withdraw(0, web3.utils.toWei('200', 'ether'), {from: carol}), 'withdraw: not good');
+            await this.chef.withdraw(0, web3.utils.toWei('100', 'ether'), {from: bob});
+            let balanceOf = await this.fast.balanceOf(bob);
+
+            // assert(balanceOf > web3.utils.toWei('89041', 'ether'));
+            // assert(balanceOf < web3.utils.toWei('89044', 'ether'));
+
+            // assert.equal(await this.lp.balanceOf(bob), web3.utils.toWei('1000', 'ether'));
+        });
     });
 });

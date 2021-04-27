@@ -35,7 +35,7 @@ contract MasterChef is Ownable {
     using SafeERC20 for IERC20;
 
     uint256 constant UNIT = 1e18;
-    uint256 constant YEAR = 183;
+    uint256 constant YEAR = 91;
 
     uint256 private billion = 1e9 * UNIT;
     uint256 private totalFastAvailable = billion.mul(65).div(100);
