@@ -6,11 +6,6 @@ module.exports = {
       provider: TestRPC.provider(),
       network_id: '*'
     },
-    testnet: {
-      host: 'qtum:testpasswd@localhost',
-      port: 23889,
-      network_id: '*'
-    },
     dev: {
       host: '127.0.0.1',
       port: 7545,
