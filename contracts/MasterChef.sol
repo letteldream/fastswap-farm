@@ -10,15 +10,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 interface IMigratorChef {
-    // Perform LP token migration from legacy UniswapV2 to FastSwap.
-    // Take the current LP token address and return the new LP token address.
-    // Migrator should have full access to the caller's LP token.
-    // Return the new LP token address.
-    //
-    // XXX Migrator must have allowance access to UniswapV2 LP tokens.
-    // FastSwap must mint EXACTLY the same amount of FastSwap LP tokens or
-    // else something bad will happen. Traditional UniswapV2 does not
-    // do that so be careful!
     function migrate(IERC20 token) external returns (IERC20);
 }
 
@@ -35,11 +26,11 @@ contract MasterChef is Ownable {
     using SafeERC20 for IERC20;
 
     uint256 constant UNIT = 1e18;
-    uint256 constant YEAR = 91;
+    uint256 constant DAYS = 91;
 
     uint256 private billion = 1e9 * UNIT;
     uint256 private totalFastAvailable = billion.mul(65).div(100);
-    uint256 private perYear = YEAR.mul(86400);
+    uint256 private perDays = DAYS.mul(86400);
 
     // Info of each user.
     struct UserInfo {
@@ -67,7 +58,7 @@ contract MasterChef is Ownable {
     // Info of each pool.
     PoolInfo[] public poolInfo;
     // Info of each user that stakes LP tokens.
-    mapping (uint256 => mapping (address => UserInfo)) public userInfo;
+    mapping(uint256 => mapping(address => UserInfo)) public userInfo;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
@@ -75,11 +66,10 @@ contract MasterChef is Ownable {
 
     constructor(
         IERC20 _fast,
-        uint256 _endTime,
         uint256 _startTime
     ) public {
         fast = _fast;
-        endTime = _endTime;
+        endTime = _startTime.add(perDays);
         startTime = _startTime;
     }
 
@@ -110,7 +100,7 @@ contract MasterChef is Ownable {
                 time = endTime.sub(pool.lastRewardTime);
             }
 
-            uint256 fastReward = pool.amountFastTokens.mul(1e18).div(perYear).mul(time);
+            uint256 fastReward = pool.amountFastTokens.mul(1e18).div(perDays).mul(time);
             if (fastReward > 0) {
                 accFastPerShare = accFastPerShare.add(fastReward.div(lpSupply));
             }
@@ -136,10 +126,10 @@ contract MasterChef is Ownable {
 
         uint256 lastRewardTime = block.timestamp > startTime ? block.timestamp : startTime;
         poolInfo.push(PoolInfo({
-        lpToken: _lpToken,
-        amountFastTokens: _amountFastTokens,
-        lastRewardTime: lastRewardTime,
-        accFastPerShare: 0
+        lpToken : _lpToken,
+        amountFastTokens : _amountFastTokens,
+        lastRewardTime : lastRewardTime,
+        accFastPerShare : 0
         }));
     }
 
@@ -216,8 +206,8 @@ contract MasterChef is Ownable {
 
         uint256 time = block.timestamp.sub(pool.lastRewardTime);
 
-        uint256 fastReward = pool.amountFastTokens.div(perYear).mul(time);
-        if (fastReward > 0 ) {
+        uint256 fastReward = pool.amountFastTokens.div(perDays).mul(time);
+        if (fastReward > 0) {
             pool.accFastPerShare = pool.accFastPerShare.add(fastReward.mul(1e18).div(lpSupply));
         }
 

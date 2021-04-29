@@ -10,8 +10,7 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
     it('should set correct state variables', async () => {
         const timestamp = await time.latest();
-        const endTimestamp = timestamp.add(time.duration.days(3));
-        this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+        this.chef = await MasterChef.new(this.fast.address, timestamp, {from: alice});
 
         const fast = await this.chef.fast();
         assert.equal(fast.valueOf(), this.fast.address);
@@ -19,8 +18,7 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
     it('should correct change variables', async () => {
         const timestamp = await time.latest();
-        const endTimestamp = timestamp.add(time.duration.days(3));
-        this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+        this.chef = await MasterChef.new(this.fast.address, timestamp, {from: alice});
 
         await this.chef.setMigrator(migrator)
 
@@ -43,8 +41,7 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
         it('should return correct poolLength', async () => {
             const timestamp = await time.latest();
-            const endTimestamp = timestamp.add(time.duration.days(90));
-            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            this.chef = await MasterChef.new(this.fast.address, timestamp, {from: alice});
             this.fast.transfer(this.chef.address, web3.utils.toWei('1000000000', 'ether'), {from: minter});
 
             await expectRevert(this.chef.add(0, this.lp.address, true), 'add: incorrect value');
@@ -57,8 +54,7 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
         it('should allow emergency withdraw', async () => {
             const timestamp = await time.latest();
-            const endTimestamp = timestamp.add(time.duration.days(90));
-            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            this.chef = await MasterChef.new(this.fast.address, timestamp, {from: alice});
             this.fast.transfer(this.chef.address, web3.utils.toWei('1000000000', 'ether'), {from: minter});
 
             await this.chef.add(20, this.lp.address, true);
@@ -73,8 +69,7 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
         it('should return correct values pendingFast for 1 user', async () => {
             const timestamp = await time.latest();
-            const endTimestamp = timestamp.add(time.duration.days(91));
-            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            this.chef = await MasterChef.new(this.fast.address, timestamp, {from: alice});
             // To last for 3 days
             this.fast.transfer(this.chef.address, web3.utils.toWei('20000', 'ether'), {from: minter});
 
@@ -85,45 +80,39 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
             await time.increase(time.duration.days(1));
             let pendingFast = await this.chef.pendingFast(0, bob);
-            // console.log("1 day, pendingFast: ", pendingFast.toString())
             assert(pendingFast > web3.utils.toWei('217', 'ether'));
             assert(pendingFast < web3.utils.toWei('221', 'ether'));
 
             await time.increase(time.duration.days(1));
             pendingFast = await this.chef.pendingFast(0, bob);
-            // console.log("2 day, pendingFast: ", pendingFast.toString())
             assert(pendingFast > web3.utils.toWei('437', 'ether'));
             assert(pendingFast < web3.utils.toWei('441', 'ether'));
 
             await time.increase(time.duration.days(1));
             pendingFast = await this.chef.pendingFast(0, bob);
-            // console.log("3 day, pendingFast: ", pendingFast.toString())
             assert(pendingFast > web3.utils.toWei('657', 'ether'));
             assert(pendingFast < web3.utils.toWei('661', 'ether'));
 
             await time.increase(time.duration.days(7));
             pendingFast = await this.chef.pendingFast(0, bob);
-            // console.log("10 day, pendingFast: ", pendingFast.toString())
             assert(pendingFast > web3.utils.toWei('2195', 'ether'));
             assert(pendingFast < web3.utils.toWei('2199', 'ether'));
 
             await time.increase(time.duration.days(81));
             pendingFast = await this.chef.pendingFast(0, bob);
-            // console.log("91 day, pendingFast: ", pendingFast.toString())
-            assert(pendingFast > web3.utils.toWei('19997', 'ether'));
-            assert(pendingFast < web3.utils.toWei('20002', 'ether'));
+            console.log("91 day, pendingFast: ", pendingFast.toString())
+            assert(pendingFast > web3.utils.toWei('19999', 'ether'));
+            assert(pendingFast <= web3.utils.toWei('20000', 'ether'));
 
             await time.increase(time.duration.days(91));
             pendingFast = await this.chef.pendingFast(0, bob);
-            // console.log("182 day, pendingFast: ", pendingFast.toString())
-            assert(pendingFast > web3.utils.toWei('19997', 'ether'));
-            assert(pendingFast < web3.utils.toWei('20002', 'ether'));
+            assert(pendingFast > web3.utils.toWei('19999', 'ether'));
+            assert(pendingFast <= web3.utils.toWei('20000', 'ether'));
         });
 
         it('should return correct values fast balanceOf for 1 user', async () => {
             const timestamp = await time.latest();
-            const endTimestamp = timestamp.add(time.duration.days(91));
-            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            this.chef = await MasterChef.new(this.fast.address, timestamp, {from: alice});
             // To last for 3 days
             this.fast.transfer(this.chef.address, web3.utils.toWei('20000', 'ether'), {from: minter});
 
@@ -134,7 +123,6 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
             await time.increase(time.duration.days(10));
             let pendingFast = await this.chef.pendingFast(0, bob);
-            // console.log("10 day, pendingFast: ", pendingFast.toString())
             assert(pendingFast > web3.utils.toWei('2195', 'ether'));
             assert(pendingFast < web3.utils.toWei('2199', 'ether'));
 
@@ -143,7 +131,6 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
             await time.increase(time.duration.days(81));
             pendingFast = await this.chef.pendingFast(0, bob);
-            // console.log("91 day, pendingFast: ", pendingFast.toString())
             assert(pendingFast > web3.utils.toWei('17800', 'ether'));
             assert(pendingFast < web3.utils.toWei('17804', 'ether'));
 
@@ -151,8 +138,7 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
         it('should return correct values Fast balanceOf for 1 user. Change pool', async () => {
             const timestamp = await time.latest();
-            const endTimestamp = timestamp.add(time.duration.days(91));
-            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            this.chef = await MasterChef.new(this.fast.address, timestamp, {from: alice});
             this.fast.transfer(this.chef.address, web3.utils.toWei('300000', 'ether'), {from: minter});
 
             await this.chef.add(web3.utils.toWei('20000', 'ether'), this.lp.address, false);
@@ -181,8 +167,7 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
         it('should return correct values Fast balanceOf for 2 user', async () => {
             const timestamp = await time.latest();
-            const endTimestamp = timestamp.add(time.duration.days(90));
-            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            this.chef = await MasterChef.new(this.fast.address, timestamp, {from: alice});
             // To last for 3 days
             this.fast.transfer(this.chef.address, web3.utils.toWei('20000', 'ether'), {from: minter});
             await this.chef.add(web3.utils.toWei('20000', 'ether'), this.lp.address, true);
@@ -207,8 +192,7 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
         it('should return correct values Fast balanceOf for 2 user on different days', async () => {
             const timestamp = await time.latest();
-            const endTimestamp = timestamp.add(time.duration.days(90));
-            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            this.chef = await MasterChef.new(this.fast.address, timestamp, {from: alice});
             // To last for 3 days
             this.fast.transfer(this.chef.address, web3.utils.toWei('200000', 'ether'), {from: minter});
             await this.chef.add(web3.utils.toWei('200000', 'ether'), this.lp.address, false);
@@ -239,8 +223,7 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
         it('should return correct values Fast balanceOf for 2 user on different days. Recount at the end', async () => {
             const timestamp = await time.latest();
-            const endTimestamp = timestamp.add(time.duration.days(90));
-            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            this.chef = await MasterChef.new(this.fast.address, timestamp, {from: alice});
             // To last for 3 days
             this.fast.transfer(this.chef.address, web3.utils.toWei('200000', 'ether'), {from: minter});
             await this.chef.add(web3.utils.toWei('200000', 'ether'), this.lp.address, true);
@@ -270,8 +253,7 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
         it('should return correct values Fast and LP balanceOf for 1 user', async () => {
             const timestamp = await time.latest();
-            const endTimestamp = timestamp.add(time.duration.days(90));
-            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            this.chef = await MasterChef.new(this.fast.address, timestamp, {from: alice});
             // To last for 3 days
             this.fast.transfer(this.chef.address, web3.utils.toWei('200000', 'ether'), {from: minter});
 
@@ -298,8 +280,7 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
         it('checking if user can participate in 2 pools the same time', async () => {
             const timestamp = await time.latest();
-            const endTimestamp = timestamp.add(time.duration.days(91));
-            this.chef = await MasterChef.new(this.fast.address, endTimestamp, timestamp, {from: alice});
+            this.chef = await MasterChef.new(this.fast.address, timestamp, {from: alice});
             // To last for 3 days
             this.fast.transfer(this.chef.address, web3.utils.toWei('20000', 'ether'), {from: minter});
 
@@ -316,13 +297,10 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
             await time.increase(time.duration.days(1));
             let pendingFast = await this.chef.pendingFast(0, bob);
-            // console.log("1 day, pendingFast: ", pendingFast.toString())
             assert(pendingFast > web3.utils.toWei('217', 'ether'));
             assert(pendingFast < web3.utils.toWei('221', 'ether'));
 
-
             pendingFast = await this.chef.pendingFast(1, bob);
-            // console.log("1 day, pendingFast: ", pendingFast.toString())
             assert(pendingFast > web3.utils.toWei('217', 'ether'));
             assert(pendingFast < web3.utils.toWei('221', 'ether'));
         });
