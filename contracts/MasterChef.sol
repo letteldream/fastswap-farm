@@ -159,6 +159,13 @@ contract MasterChef is Ownable {
     }
 
     /**
+     * @dev Set the end time. Can only be called by the owner.
+     */
+    function setEndTime(uint256 _endTime) public onlyOwner {
+        endTime = _endTime;
+    }
+
+    /**
      * @dev Migrate lp token to another lp contract. Can be called by anyone. We trust that migrator contract is good.
      * @param _pid pool ID
      */
