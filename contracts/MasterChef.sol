@@ -46,6 +46,8 @@ contract MasterChef is Ownable {
         uint256 accFastPerShare;    // Accumulated FASTs per share, times 1e18. See below.
     }
 
+    // Amount of tokens to be distributed
+    uint256 public amountFastTokensDays;
     // The FAST TOKEN!
     IERC20 public fast;
     // The time when FAST mining end.
@@ -119,6 +121,8 @@ contract MasterChef is Ownable {
     function add(uint256 _amountFastTokens, IERC20 _lpToken, bool _withUpdate) public onlyOwner {
         require(block.timestamp <= endTime, "contract stopped work");
         require(_amountFastTokens > 0, "add: incorrect value");
+        require(block.timestamp < startTime, "set: sorry, mining already started");
+        require(fast.balanceOf(address(this)) >= amountFastTokensDays + _amountFastTokens, "add: not enough balance on contract");
 
         if (_withUpdate) {
             massUpdatePools();
@@ -131,6 +135,7 @@ contract MasterChef is Ownable {
         lastRewardTime : lastRewardTime,
         accFastPerShare : 0
         }));
+        amountFastTokensDays += _amountFastTokens;
     }
 
     /**
@@ -142,12 +147,15 @@ contract MasterChef is Ownable {
     function set(uint256 _pid, uint256 _amountFastTokens, bool _withUpdate) public onlyOwner {
         require(block.timestamp <= endTime, "contract stopped work");
         require(_amountFastTokens > 0, "set: incorrect value");
+        require(block.timestamp < startTime, "set: sorry, mining already started");
+        require(fast.balanceOf(address(this)) >= amountFastTokensDays - poolInfo[_pid].amountFastTokens + _amountFastTokens, "add: not enough balance on contract");
 
         if (_withUpdate) {
             massUpdatePools();
         }
 
         poolInfo[_pid].amountFastTokens = _amountFastTokens;
+        amountFastTokensDays = amountFastTokensDays - poolInfo[_pid].amountFastTokens + _amountFastTokens;
     }
 
     /**
@@ -156,13 +164,6 @@ contract MasterChef is Ownable {
      */
     function setMigrator(IMigratorChef _migrator) public onlyOwner {
         migrator = _migrator;
-    }
-
-    /**
-     * @dev Set the end time. Can only be called by the owner.
-     */
-    function setEndTime(uint256 _endTime) public onlyOwner {
-        endTime = _endTime;
     }
 
     /**

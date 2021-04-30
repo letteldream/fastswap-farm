@@ -282,7 +282,7 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
             const timestamp = await time.latest();
             this.chef = await MasterChef.new(this.fast.address, timestamp, {from: alice});
             // To last for 3 days
-            this.fast.transfer(this.chef.address, web3.utils.toWei('20000', 'ether'), {from: minter});
+            this.fast.transfer(this.chef.address, web3.utils.toWei('40000', 'ether'), {from: minter});
 
             await this.chef.add(web3.utils.toWei('20000', 'ether'), this.lp.address, true);
             await this.lp.approve(this.chef.address, web3.utils.toWei('20001', 'ether'), {from: bob});
