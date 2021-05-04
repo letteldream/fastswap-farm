@@ -1,4 +1,4 @@
-const { time } = require('@openzeppelin/test-helpers');
+const {time} = require('@openzeppelin/test-helpers');
 
 const FAST = artifacts.require('MockERC20');
 const MVP = artifacts.require('MockERC20');
@@ -25,15 +25,14 @@ const MasterChef = artifacts.require('MasterChef');
 const Fast = artifacts.require('MockERC20');
 
 module.exports = async function (deployer, network, accounts) {
-    if (network === 'development' || network === 'test' || network === 'soliditycoverage' || network == 'otherhost' || network == "dev"){
+    if (network === 'development' || network === 'test' || network === 'soliditycoverage' || network == 'otherhost'){
     } else {
         const ether = (n) => web3.utils.toWei(n, 'ether');
 
-        console.log(accounts[0])
-        let fast = await deployer.deploy(Fast, 'FAST Token', 'FAST', ether('1000000'), {from: accounts[0]});
+        const fast = await Fast.new('FAST Token', 'FAST', ether('1000000'), {from: accounts[0]});
 
-        let timestamp = await time.latest();
-        let masterchef = await deployer.deploy(MasterChef, fast.address, timestamp.add(time.duration.minutes(30)), {from: accounts[0]});
+        const ts = await time.latest();
+        let masterchef = await MasterChef.new(fast.address, ts.add(time.duration.minutes(30)), {from: accounts[0]});
         await fast.transfer(masterchef.address, web3.utils.toWei('120002', 'ether'), {from: accounts[0]});
 
 
