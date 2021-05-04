@@ -26,7 +26,7 @@ const Fast = artifacts.require('MockERC20');
 
 module.exports = async function (deployer, network, accounts) {
     if (network === 'development' || network === 'test' || network === 'soliditycoverage' || network == 'otherhost'){
-    } else {
+    } else if (network == 'binancetestnet' || network == 'dev') {
         const ether = (n) => web3.utils.toWei(n, 'ether');
 
         let fast = await deployer.deploy(Fast, 'FAST Token', 'FAST', ether('1000000'), {from: accounts[0]});
@@ -138,6 +138,7 @@ module.exports = async function (deployer, network, accounts) {
         // await SNX_pair.approve(masterchef.address, ether('100'));
         // await masterchef.deposit(0, ether('100'));
 
+    } else if (network == 'binancemainnet') {
 
-    }
+    } else {}
 };
