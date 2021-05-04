@@ -7,7 +7,7 @@ module.exports = function (deployer, network) {
   deployer.then(async () => {
     if (network === 'development' || network === 'test' || network === 'soliditycoverage' || network == 'otherhost'){
 
-    } else if (network == 'binancetestnet' || network == 'dev') {
+    } else if (network == 'testnet' || network == 'dev') {
       const fast = await deployer.deploy(MockERC20, 'FAST Token', 'FAST', ether('1000000'));
       
       const ts = new Date().getTime();
