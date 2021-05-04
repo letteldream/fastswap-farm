@@ -139,26 +139,6 @@ contract MasterChef is Ownable {
     }
 
     /**
-     * @dev Update the given pool's FAST percent. Can only be called by the owner.
-     * @param _pid pool ID
-     * @param _amountFastTokens amount of tokens
-     * @param _withUpdate whether to update information
-     */
-    function set(uint256 _pid, uint256 _amountFastTokens, bool _withUpdate) public onlyOwner {
-        require(block.timestamp <= endTime, "contract stopped work");
-        require(_amountFastTokens > 0, "set: incorrect value");
-        require(block.timestamp < startTime, "set: sorry, giveaway already started");
-        require(fast.balanceOf(address(this)) >= totalAmountFastTokens - poolInfo[_pid].amountFastTokens + _amountFastTokens, "add: not enough balance on contract");
-
-        if (_withUpdate) {
-            massUpdatePools();
-        }
-
-        poolInfo[_pid].amountFastTokens = _amountFastTokens;
-        totalAmountFastTokens = totalAmountFastTokens - poolInfo[_pid].amountFastTokens + _amountFastTokens;
-    }
-
-    /**
      * @dev Set the migrator contract. Can only be called by the owner.
      * @param _migrator migrator interface
      */
