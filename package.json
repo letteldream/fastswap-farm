@@ -1,17 +1,14 @@
 {
-  "name": "master-chef",
+  "name": "masterchef",
   "version": "1.0.0",
   "scripts": {
     "test": "truffle test",
     "build": "truffle compile",
     "migrate": "truffle migrate",
-    "lint": "solium --dir contract",
+    "lint": "solium --dir contracts",
     "coverage": "node --max-old-space-size=4096 ./node_modules/.bin/truffle run coverage",
-    "deploy:build:tsc": "tsc --build",
-    "deploy:build:js": "node ./migrations/2_deploy_contract.js",
     "deploy:testnet": "truffle deploy --network binancetest --reset",
-    "deploy:devnet": "truffle deploy --network dev --reset",
-    "deploy": "waffle waffle.json && npm run deploy:build:tsc && npm run deploy:build:js"
+    "deploy:devnet": "truffle deploy --network dev --reset"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^3.3.0",
