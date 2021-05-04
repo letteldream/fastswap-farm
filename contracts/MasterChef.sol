@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.6.12;
 
-
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
 
 interface IMigratorChef {
     function migrate(IERC20 token) external returns (IERC20);
@@ -41,9 +39,9 @@ contract MasterChef is Ownable {
     // Info of each pool.
     struct PoolInfo {
         IERC20 lpToken;           // Address of LP token contract.
-        uint256 amountFastTokens;  // Percentage of tokens to be distributed.
+        uint256 amountFastTokens; // Percentage of tokens to be distributed.
         uint256 lastRewardTime;   // Last time number that FASTs distribution occurs.
-        uint256 accFastPerShare;    // Accumulated FASTs per share, times 1e18. See below.
+        uint256 accFastPerShare;  // Accumulated FASTs per share, times 1e18. See below.
     }
 
     // Amount of tokens to be distributed
@@ -121,7 +119,6 @@ contract MasterChef is Ownable {
     function add(uint256 _amountFastTokens, IERC20 _lpToken, bool _withUpdate) public onlyOwner {
         require(block.timestamp <= endTime, "contract stopped work");
         require(_amountFastTokens > 0, "add: incorrect value");
-        require(block.timestamp < startTime, "add: sorry, giveaway already started");
         require(fast.balanceOf(address(this)) >= totalAmountFastTokens + _amountFastTokens, "add: not enough balance on contract");
 
         if (_withUpdate) {
@@ -130,10 +127,10 @@ contract MasterChef is Ownable {
 
         uint256 lastRewardTime = block.timestamp > startTime ? block.timestamp : startTime;
         poolInfo.push(PoolInfo({
-        lpToken : _lpToken,
-        amountFastTokens : _amountFastTokens,
-        lastRewardTime : lastRewardTime,
-        accFastPerShare : 0
+            lpToken : _lpToken,
+            amountFastTokens : _amountFastTokens,
+            lastRewardTime : lastRewardTime,
+            accFastPerShare : 0
         }));
         totalAmountFastTokens += _amountFastTokens;
     }
