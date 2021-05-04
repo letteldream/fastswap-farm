@@ -29,10 +29,10 @@ module.exports = async function (deployer, network, accounts) {
     } else {
         const ether = (n) => web3.utils.toWei(n, 'ether');
 
-        const fast = await Fast.new('FAST Token', 'FAST', ether('1000000'), {from: accounts[0]});
+        let fast = await deployer.deploy(Fast, 'FAST Token', 'FAST', ether('1000000'), {from: accounts[0]});
 
-        const ts = await time.latest();
-        let masterchef = await MasterChef.new(fast.address, ts.add(time.duration.minutes(30)), {from: accounts[0]});
+        let ts = new Date().getTime();
+        let masterchef = await deployer.deploy(MasterChef, fast.address, ts + 30 * 60, {from: accounts[0]});
         await fast.transfer(masterchef.address, web3.utils.toWei('120002', 'ether'), {from: accounts[0]});
 
 
