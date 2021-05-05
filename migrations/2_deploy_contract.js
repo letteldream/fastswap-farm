@@ -128,10 +128,10 @@ module.exports = function (deployer, network) {
       await SNX_pair.approve(masterchef.address, ether('100'));
       await masterchef.deposit(19, ether('100'));
     } else if (network == 'testnet' || network == 'bsc') {
-      // TODO: testnet token address
       let fastTokenAddress;
       if (network == 'testnet') {
-        fastTokenAddress = '0x1b3333baf60bb033b776879379af5eca532040c0';
+        // TODO: testnet token address
+        fastTokenAddress = '';
       } else if (network == 'bsc') {
         fastTokenAddress = '0x4d338614fc25afe6edf3994f331b4bad32fb3c6a';
       }
