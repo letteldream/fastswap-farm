@@ -10,7 +10,8 @@
     "lint": "npm run eslint && npm run solium",
     "coverage": "node --max-old-space-size=4096 ./node_modules/.bin/truffle run coverage",
     "deploy:testnet": "truffle deploy --network testnet --reset",
-    "deploy:devnet": "truffle deploy --network dev --reset"
+    "deploy:devnet": "truffle deploy --network dev --reset",
+    "deploy:bsc": "truffle deploy --network bsc --reset"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^3.3.0",
