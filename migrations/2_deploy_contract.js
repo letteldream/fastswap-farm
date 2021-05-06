@@ -6,16 +6,18 @@ const FastswapFactory = artifacts.require('FastswapFactory');
 const ether = (n) => web3.utils.toWei(n, 'ether');
 
 async function addLP(name, token0, token1, amount, fastswapFactory, masterchef) {
-  console.log(name);
+  console.log('\n'+name);
 
   let pair = await fastswapFactory.getPair.call(token0, token1);
   if (pair == '0x0000000000000000000000000000000000000000') {
-    pair = await fastswapFactory.createPair.call(token0, token1);
+    console.log('Pair doesn\'t exist, creating...');
+    await fastswapFactory.createPair(token0, token1);
+    pair = await fastswapFactory.getPair.call(token0, token1);
   }
 
-  console.log("Pair address: " + pair);
+  console.log('Pair address: ' + pair);
   await masterchef.add(ether(amount), pair, false);
-  console.log("----------------------------------------------------");
+  console.log('----------------------------------------------------');
 }
 
 module.exports = function (deployer, network) {
@@ -127,11 +129,11 @@ module.exports = function (deployer, network) {
       await masterchef.add(ether('5000'), SNX_pair.address, false);
       await SNX_pair.approve(masterchef.address, ether('100'));
       await masterchef.deposit(19, ether('100'));
+
     } else if (network == 'testnet' || network == 'bsc') {
       let fastTokenAddress;
       if (network == 'testnet') {
-        // TODO: testnet token address
-        fastTokenAddress = '';
+        fastTokenAddress = '0xF8759390158213A448300b8784C3ab37f7AA5319';
       } else if (network == 'bsc') {
         fastTokenAddress = '0x4d338614fc25afe6edf3994f331b4bad32fb3c6a';
       }
@@ -139,16 +141,18 @@ module.exports = function (deployer, network) {
       const wBNB = '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c';
       
       let fastswapFactory;
+      let start;
       if (network == 'testnet') {
         fastswapFactory = await FastswapFactory.at('0x554DB92dcb69bB96b6F543f1154d5471c29C8ca2');
+        start = 1622858744;
       } else if (network == 'bsc') {
         fastswapFactory = await FastswapFactory.at('0x59DA12BDc470C8e85cA26661Ee3DCD9B85247C88');
+        start = 1622858744;
       }
 
       const fast = await Fast.at(fastTokenAddress);
 
       // TODO: time start contract
-      const start = 1622858744;
       const masterchef = await deployer.deploy(MasterChef, fastTokenAddress, start);
 
       await fast.transfer(masterchef.address, ether('120000'));
@@ -157,7 +161,7 @@ module.exports = function (deployer, network) {
       await addLP('FAST/BNB', fastTokenAddress, wBNB, '20000', fastswapFactory, masterchef);
 
       // MVP/BNB
-      await addLP('MVP/BNB', '', wBNB, '7500', fastswapFactory, masterchef);
+      // await addLP('MVP/BNB', '', wBNB, '7500', fastswapFactory, masterchef);
 
       // YFT/BNB
       await addLP('YFT/BNB', '0xB5257E125C9311B61CA7a58b3C11cB8806AFaC1f', wBNB, '7500', fastswapFactory, masterchef);

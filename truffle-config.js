@@ -2,9 +2,16 @@ const TestRPC = require('ganache-cli')
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 const fs = require('fs');
 
-const mnemonic = fs.readFileSync('.secret').toString().trim();
+const { mnemonic, BSCSCANAPIKEY} = require('./env.json');
 
 module.exports = {
+  plugins: [
+    'truffle-plugin-verify',
+    "solidity-coverage"
+  ],
+  api_keys: {
+    bscscan: BSCSCANAPIKEY
+  },
   networks: {
     development: {
       provider: TestRPC.provider(),
@@ -28,14 +35,14 @@ module.exports = {
       skipDryRun: true
     },
   },
-  plugins: ["solidity-coverage"],
   compilers: {
     solc: {
       version: '^0.6.0',
       settings: {
         optimizer: {
           enabled: true
-        }
+        },
+        evmVersion: "byzantium",
       }
     }
   }
