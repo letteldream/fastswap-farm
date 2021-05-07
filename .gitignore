@@ -4,3 +4,7 @@
 node_modules
 coverage
 coverage.json
+
+build/
+
+env.json

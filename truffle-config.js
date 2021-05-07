@@ -1,10 +1,12 @@
 const TestRPC = require('ganache-cli')
 const HDWalletProvider = require("@truffle/hdwallet-provider");
-
-// add private key here
-const privKeyBinanceTestnet = ["b679378ab94044ae66ff4c470c8269ef392d2ecf1c938a4674113b81511dfdfd"];
+const { mnemonic, BSCSCANAPIKEY } = require('./env.json');
 
 module.exports = {
+  plugins: ['truffle-plugin-verify', 'solidity-coverage'],
+  api_keys: {
+    bscscan: BSCSCANAPIKEY
+  },
   networks: {
     development: {
       provider: TestRPC.provider(),
@@ -15,21 +17,28 @@ module.exports = {
       port: 7545,
       network_id: '*'
     },
-    binancetest: {
-      provider: () => new HDWalletProvider(privKeyBinanceTestnet, 'https://data-seed-prebsc-1-s1.binance.org:8545'),
-      host: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+    testnet: {
+      provider: () => new HDWalletProvider(mnemonic, `https://data-seed-prebsc-1-s1.binance.org:8545`),
       network_id: 97,
-    }
+      confirmations: 2,
+      skipDryRun: true
+    },
+    bsc: {
+      provider: () => new HDWalletProvider(mnemonic, `https://bsc-dataseed1.binance.org`),
+      network_id: 56,
+      confirmations: 2,
+      skipDryRun: true
+    },
   },
-  plugins: ["solidity-coverage"],
   compilers: {
     solc: {
       version: '^0.6.0',
       settings: {
         optimizer: {
           enabled: true
-        }
+        },
+        evmVersion: "byzantium"
       }
     }
   }
-}
+};
