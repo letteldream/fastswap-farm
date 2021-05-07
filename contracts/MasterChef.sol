@@ -23,11 +23,7 @@ contract MasterChef is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    uint256 constant UNIT = 1e18;
     uint256 constant DAYS = 91;
-
-    uint256 private billion = 1e9 * UNIT;
-    uint256 private totalFastAvailable = billion.mul(65).div(100);
     uint256 private perDays = DAYS.mul(86400);
 
     // Info of each user.
@@ -69,8 +65,8 @@ contract MasterChef is Ownable {
         uint256 _startTime
     ) public {
         fast = _fast;
-        endTime = _startTime.add(perDays);
         startTime = _startTime;
+        endTime = _startTime.add(perDays);
     }
 
     /**
