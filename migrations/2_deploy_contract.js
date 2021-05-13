@@ -12,9 +12,11 @@ async function addLP(id, name, token0, token1, amount, deployer, fastswapFactory
   console.log(network);
 
   if (network == 'testnet') {
-    const token = await deployer.deploy(MockERC20, name, name, ether('200'));
-    console.log('Deploy token for testnet: ' + name + "\nAddress: " + token.address);
-    token0 = token.address
+    if (name !== 'FAST/BNB') {
+      const token = await deployer.deploy(MockERC20, name, name, ether('200'));
+      console.log('Deploy token for testnet: ' + name + "\nAddress: " + token.address);
+      token0 = token.address
+    }
 
     const router = await FastswapRouter02.at('0x211A47A691c84D3576Ff081ff9709F19F0813983');
 
