@@ -12,22 +12,20 @@ async function addLP(id, name, token0, token1, amount, deployer, fastswapFactory
   console.log(network);
 
   if (network == 'testnet') {
+    const router = await FastswapRouter02.at('0x211A47A691c84D3576Ff081ff9709F19F0813983');
     if (name !== 'FAST/BNB') {
       const token = await deployer.deploy(MockERC20, name, name, ether('200'));
       console.log('Deploy token for testnet: ' + name + "\nAddress: " + token.address);
-      token0 = token.address
+      token0 = token
     }
-
-    const router = await FastswapRouter02.at('0x211A47A691c84D3576Ff081ff9709F19F0813983');
-
-    await token.approve('0x211A47A691c84D3576Ff081ff9709F19F0813983', ether('10'));
-    await router.addLiquidityETH(token0, ether('10'), 0, 0, address, 1636667466, { value: ether('0.001') });
+    await token0.approve(router.address, ether('10'));
+    await router.addLiquidityETH(token0.address, ether('10'), 0, 0, address, 1636667466, { value: ether('0.001') });
     console.log('Add Liquidity ETH!');
   }
 
-  console.log('Pair: ' + token0 + '-' + token1);
+  console.log('Pair: ' + token0.address + '-' + token1);
 
-  let pair = await fastswapFactory.getPair.call(token0, token1);
+  let pair = await fastswapFactory.getPair.call(token0.address, token1);
   if (pair == '0x0000000000000000000000000000000000000000') {
     console.log('Pair doesn\'t exist, creating...');
     await fastswapFactory.createPair(token0, token1);
@@ -148,7 +146,7 @@ module.exports = function (deployer, network) {
       await fast.transfer(masterchef.address, ether('135000'));
 
       // FAST/BNB
-      await addLP(0, 'FAST/BNB', fastTokenAddress, wBNB, '20000', deployer, fastswapFactory, masterchef, network);
+      await addLP(0, 'FAST/BNB', fast, wBNB, '20000', deployer, fastswapFactory, masterchef, network);
 
       // MVP/BNB
       // await addLP('MVP/BNB', '', wBNB, '7500', fastswapFactory, masterchef);
