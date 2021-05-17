@@ -133,7 +133,7 @@ module.exports = function (deployer, network) {
       const fastswapFactory = await FastswapFactory.at('0x59DA12BDc470C8e85cA26661Ee3DCD9B85247C88');
       let start;
       if (network == 'testnet') {
-        start = 1622858744;
+        start = 1621215629;
       } else if (network == 'bsc') {
         start = 1622858744;
       }
@@ -155,7 +155,7 @@ module.exports = function (deployer, network) {
       // await addLP('YFT/BNB', '0xB5257E125C9311B61CA7a58b3C11cB8806AFaC1f', wBNB, '7500', fastswapFactory, masterchef);
 
       // CAKE/BNB
-      await addLP(1, 'CAKE/BNB', '0xcd5c032ad7b385cca69dbc1f711dc382ae33c5f9', wBNB, '5000', deployer, fastswapFactory, masterchef, network);
+      await addLP(1, 'CAKE/BNB', '0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82', wBNB, '5000', deployer, fastswapFactory, masterchef, network);
 
       // ETH/BNB
       await addLP(2, 'ETH/BNB', '0x2170ed0880ac9a755fd29b2688956bd959f933f8', wBNB, '5000', deployer, fastswapFactory, masterchef, network);

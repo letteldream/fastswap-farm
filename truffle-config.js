@@ -18,11 +18,11 @@ module.exports = {
       network_id: '*'
     },
     testnet: {
-      provider: () => new HDWalletProvider(mnemonic, `https://data-seed-prebsc-1-s3.binance.org:8545`),
+      provider: () => new HDWalletProvider(mnemonic, `https://data-seed-prebsc-1-s1.binance.org:8545`),
       network_id: 97,
       confirmations: 2,
       skipDryRun: true,
-      networkCheckTimeout: 10000000,
+      networkCheckTimeout: 50000000,
       timeoutBlocks: 2000
     },
     bsc: {
