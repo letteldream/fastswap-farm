@@ -33,7 +33,6 @@ contract Timelock {
         admin_initialized = false;
     }
 
-    /* solium-disable-next-line */
     receive() external payable { }
 
     function setDelay(uint delay_) public {

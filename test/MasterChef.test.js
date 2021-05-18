@@ -146,6 +146,48 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
       assert(pendingFast <= web3.utils.toWei('20000', 'ether'));
     });
 
+    it('should return correct values pendingFast for 1 user, deposit after start', async () => {
+      const timestamp = await time.latest();
+      this.chef = await MasterChef.new(
+        this.fast.address,
+        timestamp.add(time.duration.seconds(2)),
+        { from: alice },
+      );
+      this.fast.transfer(this.chef.address, web3.utils.toWei('20000', 'ether'), { from: minter });
+
+      await this.chef.add(web3.utils.toWei('20000', 'ether'), this.lp.address, true);
+
+      await time.increase(time.duration.days(1));
+      await this.lp.approve(this.chef.address, web3.utils.toWei('20001', 'ether'), { from: bob });
+      await this.chef.deposit(0, web3.utils.toWei('91', 'ether'), { from: bob });
+      assert.equal(await this.chef.pendingFast(0, bob), 0);
+
+      await time.increase(time.duration.days(1));
+      let pendingFast = await this.chef.pendingFast(0, bob);
+      assert(pendingFast > web3.utils.toWei('217', 'ether'));
+      assert(pendingFast < web3.utils.toWei('221', 'ether'));
+
+      await time.increase(time.duration.days(1));
+      pendingFast = await this.chef.pendingFast(0, bob);
+      assert(pendingFast > web3.utils.toWei('437', 'ether'));
+      assert(pendingFast < web3.utils.toWei('441', 'ether'));
+
+      await time.increase(time.duration.days(1));
+      pendingFast = await this.chef.pendingFast(0, bob);
+      assert(pendingFast > web3.utils.toWei('657', 'ether'));
+      assert(pendingFast < web3.utils.toWei('661', 'ether'));
+
+      await time.increase(time.duration.days(7));
+      pendingFast = await this.chef.pendingFast(0, bob);
+      assert(pendingFast > web3.utils.toWei('2195', 'ether'));
+      assert(pendingFast < web3.utils.toWei('2199', 'ether'));
+
+      await time.increase(time.duration.days(81));
+      pendingFast = await this.chef.pendingFast(0, bob);
+      assert(pendingFast > web3.utils.toWei('19779', 'ether'));
+      assert(pendingFast < web3.utils.toWei('19781', 'ether'));
+    });
+
     it('should return correct values fast balanceOf for 1 user', async () => {
       const timestamp = await time.latest();
       this.chef = await MasterChef.new(
