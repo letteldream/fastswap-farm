@@ -265,6 +265,15 @@ contract MasterChef is Ownable {
     }
 
     /**
+     * @dev Emergency withdrawal of fast tokens in case of improper operation of the contract
+     * @param _amount of tokens withdrawn
+     */
+    function emergencyFastWithdraw(uint256 _amount) public onlyOwner {
+        require(_amount > 0, "emergencyFastWithdraw: amount must be greater than zero");
+        fast.transfer(msg.sender, _amount);
+    }
+
+    /**
      * @dev Safe fast transfer function, just in case if rounding error causes pool to not have enough FASTs.
      * @param _to address of the recipient
      * @param _amount amount Fast tokens

@@ -35,6 +35,7 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
     assert.equal(newMigrator.valueOf(), migrator);
   });
 
+  // eslint-disable-next-line
   context('With ERC/LP token added to the field', () => {
     beforeEach(async () => {
       this.lp = await MockERC20.new('LPToken', 'LP', web3.utils.toWei('10000000000', 'ether'), { from: minter });
@@ -82,6 +83,22 @@ contract('MasterChef', ([alice, bob, carol, minter, migrator]) => {
 
       await this.chef.emergencyWithdraw(0, { from: bob });
       assert.equal(await this.lp.balanceOf(bob), web3.utils.toWei('1000', 'ether'));
+    });
+
+    it('should allow emergency withdraw', async () => {
+      const timestamp = await time.latest();
+      this.chef = await MasterChef.new(
+        this.fast.address,
+        timestamp.add(time.duration.seconds(2)),
+        { from: alice },
+      );
+      this.fast.transfer(this.chef.address, web3.utils.toWei('1000000000', 'ether'), { from: minter });
+
+      await expectRevert(this.chef.emergencyFastWithdraw(web3.utils.toWei('100', 'ether'), { from: bob }), 'Ownable: caller is not the owner');
+      await expectRevert(this.chef.emergencyFastWithdraw(0, { from: alice }), 'emergencyFastWithdraw: amount must be greater than zero');
+
+      await this.chef.emergencyFastWithdraw(web3.utils.toWei('100', 'ether'), { from: alice });
+      assert.equal(await this.fast.balanceOf(alice), web3.utils.toWei('100', 'ether'));
     });
 
     it('should return correct values pendingFast for 1 user', async () => {
