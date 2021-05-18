@@ -138,8 +138,8 @@ module.exports = function (deployer, network) {
       if (network == 'testnet') {
         start = 1621215629;
       } else if (network == 'bsc') {
-        // Wed May 19 2021 17:00:00 GMT+0000
-        start = 1621443600;
+        // Thu May 20 2021 17:00:00 GMT+0000
+        start = 1621530000;
       }
 
       const fast = await Fast.at(fastTokenAddress);
