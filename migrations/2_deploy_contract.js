@@ -3,6 +3,7 @@ const MockERC20 = artifacts.require('MockERC20');
 const Fast = artifacts.require('Fast');
 const FastswapFactory = artifacts.require('FastswapFactory');
 const FastswapRouter02 = artifacts.require('FastswapRouter02');
+const Timelock = artifacts.require('Timelock');
 const { address } = require('../env.json');
 
 const ether = (n) => web3.utils.toWei(n, 'ether');
@@ -115,6 +116,8 @@ module.exports = function (deployer, network) {
       await dev(23, 'Waultswap', '5000', deployer, masterchef);
 
     } else if (network == 'testnet' || network == 'bsc') {
+      await deployer.deploy(Timelock, address, 172800);
+
       let fastTokenAddress;
       if (network == 'testnet') {
         const token = await deployer.deploy(MockERC20, 'Fast', 'FAST', ether('100000000000'));
@@ -129,20 +132,19 @@ module.exports = function (deployer, network) {
       } else if (network == 'bsc') {
         wBNB = '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c';
       }
-      
+
       const fastswapFactory = await FastswapFactory.at('0x59DA12BDc470C8e85cA26661Ee3DCD9B85247C88');
       let start;
       if (network == 'testnet') {
         start = 1621215629;
       } else if (network == 'bsc') {
-        start = 1622858744;
+        // Tue May 18 2021 17:00:00 GMT+0000
+        start = 1621357200;
       }
 
       const fast = await Fast.at(fastTokenAddress);
 
-      // TODO: time start contract
       const masterchef = await deployer.deploy(MasterChef, fastTokenAddress, start);
-
       await fast.transfer(masterchef.address, ether('135000'));
 
       // FAST/BNB
