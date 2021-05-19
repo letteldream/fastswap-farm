@@ -145,7 +145,8 @@ module.exports = function (deployer, network) {
       const fast = await Fast.at(fastTokenAddress);
 
       const masterchef = await deployer.deploy(MasterChef, fastTokenAddress, start);
-      await fast.transfer(masterchef.address, ether('135000'));
+      
+      // await fast.transfer(masterchef.address, ether('135000'));
 
       // FAST/BNB
       await addLP(0, 'FAST/BNB', fast, wBNB, '20000', deployer, fastswapFactory, masterchef, network);
